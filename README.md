@@ -63,9 +63,23 @@ versiones del actualizador (2.1.5 > 1.0.0 y la app no se actualizaria).
 workflow firma automaticamente si el repositorio define `WINDOWS_CERT_PFX_BASE64` y
 `WINDOWS_CERT_PASSWORD`; sin certificado Windows puede mostrar SmartScreen la primera vez.
 
+**Publicar una version (flujo completo)**
+
+```powershell
+# 1) sube la version en los 4 archivos, compila, hace commit, crea el tag y lo empuja
+pwsh -File scripts\release.ps1 -Version 2.3.0
+
+# 2) el tag dispara GitHub Actions: pruebas -> build -> instalador -> latest.json -> Release
+gh run watch
+```
+
+El script es la unica pieza que hay que recordar: **nunca se publica por commit**, solo por version
+etiquetada. Asi el canal nunca sirve builds a medias y el numero de version siempre coincide con el
+binario.
+
 **Canal remoto de actualizaciones**: el workflow publica `latest.json` junto al instalador en cada
-release. Configura en Ajustes → Canal (o con `GAD_UPDATE_URL`) la URL
-`https://github.com/<usuario>/<repo>/releases/latest/download/latest.json`.
+release. La compilacion trae ese canal como valor por defecto; se puede cambiar en Ajustes → Canal (o con `GAD_UPDATE_URL`)
+`https://github.com/Luis-JaramilloP/git-agent-desktop/releases/latest/download/latest.json`.
 
 **Limitaciones conocidas de la 2.2.0**:
 

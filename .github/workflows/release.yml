@@ -33,10 +33,10 @@ jobs:
           "version=$($Matches[1])" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Write-Host "Version: $($Matches[1])"
 
-      - name: Node.js 20
+      - name: Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Rust stable (MSVC)

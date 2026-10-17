@@ -94,9 +94,13 @@ DONDE QUEDA TODO
 
 ACTUALIZACIONES
   La app comprueba si hay version nueva al arrancar y tambien en
-  Ajustes -> "Buscar actualizaciones". Si el canal no esta configurado veras
-  "canal local no publicado": puedes indicar en Ajustes -> Canal la URL de un
-  latest.json (por ejemplo, el de GitHub Releases de la app).
+  Ajustes -> "Buscar actualizaciones". El canal por defecto es:
+
+    https://github.com/Luis-JaramilloP/git-agent-desktop/releases/latest/download/latest.json
+
+  Al detectar una version nueva muestra una ventana pequena que descarga,
+  verifica la firma SHA-256, aplica los cambios y reinicia la app.
+  Puedes cambiar el canal en Ajustes -> Canal.
 
 
 DESINSTALAR
