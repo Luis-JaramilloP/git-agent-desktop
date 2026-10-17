@@ -14,6 +14,12 @@ jobs:
     name: Compilar instalador (Windows x64)
     runs-on: windows-latest
 
+    # Los secretos se exponen como variables de entorno del job: GitHub no
+    # permite referenciar `secrets` directamente en un `if` de paso.
+    env:
+      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,14 +84,14 @@ jobs:
       # ejecutables. Sin certificado el paso se omite y el artefacto sigue
       # siendo valido (Windows puede mostrar SmartScreen la primera vez).
       - name: Firmar ejecutables (opcional)
-        if: ${{ secrets.WINDOWS_CERT_PFX_BASE64 != '' }}
+        if: ${{ env.WINDOWS_CERT_PFX_BASE64 != '' }}
         shell: pwsh
         run: |
           $pfx = Join-Path $env:RUNNER_TEMP "cert.pfx"
-          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String("${{ secrets.WINDOWS_CERT_PFX_BASE64 }}"))
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERT_PFX_BASE64))
           $signtool = (Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1).FullName
           foreach ($file in @("src-tauri\target\release\git-agent-desktop.exe", "dist-installer\GitAgentSetup.exe")) {
-            & $signtool sign /f $pfx /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 $file
+            & $signtool sign /f $pfx /p $env:WINDOWS_CERT_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $file
             if ($LASTEXITCODE -ne 0) { throw "No se pudo firmar $file" }
           }
 
