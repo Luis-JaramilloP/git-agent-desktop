@@ -1,0 +1,141 @@
+==========================================================
+ GIT AGENT DESKTOP 2.2.1 - LEEME
+ Automatizacion agentica de Pull Requests
+==========================================================
+
+QUE ES
+  Aplicacion de escritorio para Windows que prepara cambios en un repositorio
+  Git local, te los muestra como un diff y, solo si los apruebas, crea una rama,
+  hace commit, push y abre un Pull Request en GitHub.
+
+  El modelo de IA propone los cambios; el motor en Rust valida y escribe en
+  disco. Nada se publica sin tu aprobacion.
+
+
+REQUISITOS
+  - Windows 10 (1809 o superior) o Windows 11, 64 bits.
+  - Microsoft Edge WebView2  (el instalador lo agrega si falta).
+  - Git for Windows           (el instalador lo agrega si falta).
+  - GitHub CLI (gh)           (el instalador lo agrega si falta).
+  - Una cuenta de GitHub y un proveedor de IA (ver "ELIGE TU IA").
+
+
+INSTALACION
+  1. Clic derecho en GitAgentSetup.exe -> "Ejecutar como administrador".
+     Con permisos de administrador el instalador puede agregar Git y gh solo.
+  2. Windows puede mostrar "Windows protegio su PC" porque el instalador no
+     esta firmado digitalmente: pulsa "Mas informacion" y luego
+     "Ejecutar de todas formas".
+  3. Sigue el asistente. Al final se abre la aplicacion.
+
+
+PRIMEROS PASOS (2 minutos)
+  1. CONECTAR GITHUB
+     Pulsa "conectar" en la cabecera. Se abre el navegador para autorizar
+     GitHub CLI con un codigo de un solo uso. La sesion queda en el
+     Administrador de Credenciales de Windows: la app no guarda tu token.
+
+  2. ELIGE TU IA
+     Pulsa el engranaje (Ajustes) y escoge proveedor:
+
+       - Ollama (local, gratis y privado)
+         Instala https://ollama.com/download y descarga un modelo:
+             ollama pull qwen2.5-coder:7b
+         Pulsa "Guardar y probar". No necesita clave ni internet.
+
+       - Google AI Studio (Gemini, plan gratuito)
+         Clave en https://aistudio.google.com/apikey
+         Si el modelo aparece como no disponible, pulsa
+         "Ver modelos disponibles" y elige uno de la lista.
+
+       - Groq u OpenRouter (plan gratuito, muy rapidos)
+         Pega su clave. En OpenRouter usa los modelos con sufijo ":free".
+
+     La clave se guarda CIFRADA con DPAPI: solo tu cuenta de Windows puede
+     leerla, y nunca se escribe en texto plano.
+
+  3. SELECTIONAR CARPETA
+     Elige la carpeta de un repositorio Git local. Puede ser una subcarpeta:
+     la app resuelve la raiz del repositorio sola.
+     En el panel debe verse el remoto de GitHub. Si dice "(sin origin)", ese
+     clon no apunta a GitHub y el paso del PR fallara.
+
+
+COMO SE USA
+  1. Describe la tarea (o el numero de Issue) y pulsa "Ejecutar agente".
+  2. La app crea una rama agent/... y aplica los cambios; veras el diff en
+     verde y rojo.
+  3. Revisa y elige:
+       - "Aprobar y abrir PR" : commit + push + Pull Request real.
+       - "Solicitar ajuste"   : el agente rehace el cambio con tu indicacion.
+       - "Abortar"            : restaura los archivos como estaban.
+  4. Con el PR abierto, "Verificar PR" detecta cambios solicitados, fallos de
+     CI o si ya fue integrado. Si ya se fusiono, vuelve a main, actualiza y
+     limpia las ramas local y remota.
+
+
+LIMITES UTILES
+  - Maximo 3 ciclos correctivos por tarea (guardrail anti-bucles).
+  - La IA no ejecuta comandos: solo propone bloques SEARCH/REPLACE.
+  - No lee PDFs ni binarios. Para que describa un PDF, conviertelo a texto o
+    pega un resumen en la instruccion.
+  - Si el aviso dice "Posible duplicado", el modelo esta repitiendo contenido
+    que ya existe: revisa el diff antes de aprobar.
+
+
+DONDE QUEDA TODO
+  - Configuracion ............ %APPDATA%\GitAgentDesktop\config.json
+  - Clave de IA (cifrada) .... %APPDATA%\GitAgentDesktop\provider_key.dat
+  - Bitacora de intentos ..... %APPDATA%\GitAgentDesktop\memory\
+  - Actualizaciones .......... %APPDATA%\GitAgentDesktop\updates\
+  - Aplicacion ............... C:\Program Files\GitAgentDesktop (admin)
+                               %LOCALAPPDATA%\Programs\GitAgentDesktop (usuario)
+
+
+ACTUALIZACIONES
+  La app comprueba si hay version nueva al arrancar y tambien en
+  Ajustes -> "Buscar actualizaciones". Si el canal no esta configurado veras
+  "canal local no publicado": puedes indicar en Ajustes -> Canal la URL de un
+  latest.json (por ejemplo, el de GitHub Releases de la app).
+
+
+DESINSTALAR
+  Panel de control -> Aplicaciones -> Git Agent Desktop.
+  Se conservan a proposito las credenciales de GitHub CLI, porque son tuyas.
+
+
+PROBLEMAS FRECUENTES
+  - "No hay una sesion activa de GitHub"
+      Pulsa "conectar" o ejecuta:  gh auth login --web
+
+  - HTTP 401/403 del proveedor
+      La clave no es valida o caduco: vuelve a pegarla en Ajustes.
+
+  - HTTP 404 "modelo no disponible"
+      El proveedor retiro ese id. En Ajustes pulsa "Ver modelos disponibles".
+
+  - "El bloque SEARCH no coincide"
+      El modelo invento texto. Usa "Solicitar ajuste" para que lo rehaga.
+
+  - "No hay archivos de texto editables"
+      El repositorio solo tiene binarios/PDF o no es un repositorio Git.
+
+  - La interfaz se ve recortada
+      Problema de escalado de Windows. La cabecera muestra el tamano del
+      webview y el factor de escala para diagnosticarlo.
+
+
+PRIVACIDAD
+  La app no envia tu codigo a ningun sitio salvo al proveedor de IA que elijas
+  (para proponer los cambios) y a GitHub (para el PR). No hay telemetria.
+  Con Ollama local, el codigo no sale de tu equipo.
+
+
+VERIFICAR EL INSTALADOR (opcional)
+  PowerShell:   Get-FileHash .\GitAgentSetup.exe -Algorithm SHA256
+  Compara el valor con el que te hayan facilitado.
+
+
+----------------------------------------------------------
+ Git Agent Desktop 2.2.1
+----------------------------------------------------------

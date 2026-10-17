@@ -1,0 +1,144 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-installer:
+    name: Compilar instalador (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Version del proyecto
+        id: version
+        shell: pwsh
+        run: |
+          $cargo = Get-Content "src-tauri\Cargo.toml" -Raw
+          if ($cargo -notmatch '(?m)^version\s*=\s*"([^"]+)"') { throw "No se pudo leer la version" }
+          "version=$($Matches[1])" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Version: $($Matches[1])"
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Rust stable (MSVC)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache de Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
+      - name: Instalar dependencias del frontend
+        run: npm ci
+
+      - name: Compilar frontend (TypeScript + CSS)
+        run: npm run build
+
+      - name: Pruebas automatizadas
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Compilar binario nativo (Rust release)
+        run: cargo build --release --features custom-protocol --manifest-path src-tauri/Cargo.toml
+
+      - name: Verificar el binario generado
+        shell: pwsh
+        run: |
+          $exe = "src-tauri/target/release/git-agent-desktop.exe"
+          if (-not (Test-Path $exe)) { throw "No se genero $exe" }
+          Get-Item $exe | Select-Object FullName, Length
+
+      - name: Instalar Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Compilar instalador bootstrapper
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = "${env:ProgramFiles}\Inno Setup 6\ISCC.exe" }
+          & $iscc "installer\installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "ISCC fallo con codigo $LASTEXITCODE" }
+
+      # Firma de codigo opcional: si el repositorio define los secretos
+      # WINDOWS_CERT_PFX_BASE64 y WINDOWS_CERT_PASSWORD, se firman ambos
+      # ejecutables. Sin certificado el paso se omite y el artefacto sigue
+      # siendo valido (Windows puede mostrar SmartScreen la primera vez).
+      - name: Firmar ejecutables (opcional)
+        if: ${{ secrets.WINDOWS_CERT_PFX_BASE64 != '' }}
+        shell: pwsh
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "cert.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String("${{ secrets.WINDOWS_CERT_PFX_BASE64 }}"))
+          $signtool = (Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1).FullName
+          foreach ($file in @("src-tauri\target\release\git-agent-desktop.exe", "dist-installer\GitAgentSetup.exe")) {
+            & $signtool sign /f $pfx /p "${{ secrets.WINDOWS_CERT_PASSWORD }}" /tr http://timestamp.digicert.com /td sha256 /fd sha256 $file
+            if ($LASTEXITCODE -ne 0) { throw "No se pudo firmar $file" }
+          }
+
+      - name: Generar manifiesto de actualizacion
+        shell: pwsh
+        run: |
+          $setup = "dist-installer/GitAgentSetup.exe"
+          if (-not (Test-Path $setup)) { throw "No se genero $setup" }
+          $hash = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLower()
+          $size = (Get-Item $setup).Length
+          $manifest = [ordered]@{
+            version   = "${{ steps.version.outputs.version }}"
+            notes     = "Consulte las notas de la version en GitHub Releases."
+            url       = "https://github.com/${{ github.repository }}/releases/latest/download/GitAgentSetup.exe"
+            sha256    = $hash
+            size      = $size
+            mandatory = $false
+          }
+          $manifest | ConvertTo-Json -Depth 4 |
+            Set-Content -Path "dist-installer/latest.json" -Encoding utf8
+          Write-Host "Manifiesto:"
+          Get-Content "dist-installer/latest.json"
+
+      - name: Verificar artefactos
+        shell: pwsh
+        run: |
+          foreach ($file in @("dist-installer/GitAgentSetup.exe", "dist-installer/latest.json")) {
+            if (-not (Test-Path $file)) { throw "Falta $file" }
+            Get-Item $file | Select-Object FullName, Length
+          }
+
+      - name: Subir artefactos
+        uses: actions/upload-artifact@v4
+        with:
+          name: GitAgentSetup
+          path: |
+            dist-installer/GitAgentSetup.exe
+            dist-installer/latest.json
+          if-no-files-found: error
+
+      - name: Publicar release (solo en tags)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-installer/GitAgentSetup.exe
+            dist-installer/latest.json
+          generate_release_notes: true
+
+      - name: Recordatorio del canal de actualizaciones
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $url = "https://github.com/${{ github.repository }}/releases/latest/download/latest.json"
+          Write-Host "Canal de actualizaciones publicado en: $url"
+          Write-Host "Configura esa URL en Ajustes > Canal, o con GAD_UPDATE_URL."

@@ -1,0 +1,13 @@
+# Dependencias
+node_modules/
+# Salida del frontend
+dist/
+# Salida de Rust
+src-tauri/target/
+# Instalador generado
+dist-installer/
+# Archivos locales
+*.log
+.DS_Store
+Thumbs.db
+src-tauri/gen/

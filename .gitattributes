@@ -1,0 +1,23 @@
+# Normalizacion de finales de linea.
+# El motor de parcheo ya normaliza CRLF/LF en tiempo de ejecucion; estas reglas
+# evitan que Git introduzca ruido de fin de linea en los commits del agente.
+* text=auto
+
+*.rs   text
+*.ts   text
+*.css  text
+*.html text
+*.json text
+*.toml text
+*.md   text
+
+# Los scripts de Windows se mantienen en CRLF para que cmd/PowerShell los lean bien.
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.iss  text eol=crlf
+
+# Binarios
+*.png  binary
+*.ico  binary
+*.exe  binary

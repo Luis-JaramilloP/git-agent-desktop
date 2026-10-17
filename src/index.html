@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git Agent Desktop</title>
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/diff.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="7" r="3.2" />
+              <circle cx="9" cy="25" r="3.2" />
+              <circle cx="23" cy="17" r="3.2" />
+              <path d="M9 10.2v11.6" />
+              <path d="M12.2 17h7.6" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>Git Agent Desktop</h1>
+            <p>Motor determinista en Rust · Razonamiento en GitHub Models</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button id="btn-settings" class="icon-btn" type="button" title="Ajustes del proveedor de IA">&#9881;</button>
+          <div id="auth-badge" class="auth-badge" title="Estado de la sesion de GitHub CLI"></div>
+          <div id="repo-chip" class="repo-chip"></div>
+        </div>
+      </header>
+
+      <main class="layout">
+        <aside class="sidebar">
+          <section class="panel" id="repo-panel">
+            <div class="panel-head">
+              <h2>Repositorio local</h2>
+              <span class="panel-hint">Paso 1</span>
+            </div>
+            <div id="repo-body" class="panel-body"></div>
+          </section>
+
+          <section class="panel" id="prompt-panel">
+            <div class="panel-head">
+              <h2>Tarea del agente</h2>
+              <span class="panel-hint">Paso 2</span>
+            </div>
+            <div class="panel-body">
+              <label class="field">
+                <span class="field-label">Instruccion o numero de Issue</span>
+                <textarea id="task-input" rows="5" spellcheck="false"
+                  placeholder="Ej: Corrige el manejo de errores en src/services/auth.ts y agrega pruebas unitarias."></textarea>
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span class="field-label">Modelo</span>
+                  <select id="model-select"></select>
+                </label>
+                <label class="field field-issue">
+                  <span class="field-label">Issue #</span>
+                  <input id="issue-input" type="number" min="1" step="1" placeholder="opcional" />
+                </label>
+              </div>
+              <div class="btn-row">
+                <button id="btn-run" class="btn btn-primary" type="button">
+                  <span class="spinner hidden" aria-hidden="true"></span>
+                  Ejecutar agente
+                </button>
+                <button id="btn-abort" class="btn btn-danger" type="button" disabled>Abortar</button>
+              </div>
+              <p class="hint">
+                El modelo solo propone bloques SEARCH/REPLACE. Rust valida y escribe en disco;
+                nada se publica sin tu aprobacion en el visor de diferencias.
+              </p>
+            </div>
+          </section>
+
+          <section class="panel panel-grow" id="log-panel">
+            <div class="panel-head">
+              <h2>Bitacora</h2>
+              <button id="btn-clear-log" class="link-btn" type="button">limpiar</button>
+            </div>
+            <div id="log" class="log" role="log" aria-live="polite"></div>
+          </section>
+        </aside>
+
+        <section class="workspace">
+          <div class="workspace-head">
+            <div class="tabs" role="tablist">
+              <button id="tab-diff" class="tab active" type="button">Diferencias</button>
+              <button id="tab-history" class="tab" type="button">Intentos</button>
+            </div>
+            <div id="workspace-meta" class="workspace-meta"></div>
+            <div class="workspace-actions">
+              <button id="btn-approve" class="btn btn-primary" type="button" disabled>Aprobar y abrir PR</button>
+              <button id="btn-adjust" class="btn" type="button" disabled>Solicitar ajuste</button>
+              <button id="btn-check" class="btn" type="button" disabled>Verificar PR</button>
+              <button id="btn-reset" class="btn btn-ghost" type="button" disabled>Nueva tarea</button>
+            </div>
+          </div>
+
+          <div id="diff-viewer" class="diff-viewer">
+            <div class="empty-state">
+              <div class="empty-icon" aria-hidden="true">&#9671;</div>
+              <h3>Sin cambios pendientes</h3>
+              <p>Selecciona un repositorio, describe la tarea y ejecuta el agente para ver aqui el diff propuesto.</p>
+            </div>
+          </div>
+
+          <div id="history-view" class="history-view hidden"></div>
+        </section>
+      </main>
+    </div>
+    <div id="modal-root"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
