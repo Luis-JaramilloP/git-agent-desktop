@@ -10,6 +10,27 @@ atomica y publicacion de Pull Requests** con aprobacion humana obligatoria.
 
 > Implementacion del documento *«Git Agent Desktop — Plan de Arquitectura y Especificacion Tecnica v2.0»*.
 
+## Descargar e instalar (usuarios finales)
+
+**No uses el boton "Code → Download ZIP"**: eso descarga el codigo fuente, que no se puede ejecutar sin
+compilarlo. El instalador esta en *Releases*.
+
+1. Entra en **Releases → Latest**: <https://github.com/Luis-JaramilloP/git-agent-desktop/releases/latest>
+2. En **Assets** descarga **`GitAgentSetup.exe`** (el `latest.json` es solo para las actualizaciones).
+3. Clic derecho sobre el `.exe` → **Ejecutar como administrador** (asi el instalador puede agregar Git
+   y GitHub CLI). Si Windows muestra *"Windows protegio su PC"*: **Mas informacion → Ejecutar de todas
+   formas** (el binario no esta firmado).
+4. Sigue el asistente. Al final se abre la app y veras la guia `LEEME.txt`.
+
+Descarga directa (este es el enlace que conviene compartir):
+
+```text
+https://github.com/Luis-JaramilloP/git-agent-desktop/releases/latest/download/GitAgentSetup.exe
+```
+
+Requisitos: Windows 10 1809+ / 11 (x64). El instalador agrega WebView2, Git y `gh` si faltan. Cada
+usuario necesita su propio proveedor de IA (Ollama local gratis, o una clave de Gemini/Groq/OpenRouter)
+y su sesion de GitHub.
 ![Interfaz de Git Agent Desktop](docs/screenshot.png)
 
 *Captura del binario release en ejecucion (1120x700 @1.25x). La cabecera muestra la linea de
