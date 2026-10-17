@@ -1,7 +1,7 @@
 {
   "name": "git-agent-desktop",
   "private": true,
-  "version": "2.2.1",
+  "version": "2.2.2",
   "type": "module",
   "description": "Git Agent Desktop - Automatizacion agentica de Pull Requests (Tauri v2 + Rust)",
   "scripts": {

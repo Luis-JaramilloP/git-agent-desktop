@@ -13,7 +13,7 @@
 ; ============================================================================
 
 #define MyAppName "Git Agent Desktop"
-#define MyAppVersion "2.2.1"
+#define MyAppVersion "2.2.2"
 #define MyAppPublisher "Git Agent Desktop"
 #define MyAppExeName "git-agent-desktop.exe"
 #define MyAppId "{{8F3A2B94-5C1E-4C0B-9A4E-1B2D3C4E5F60}"

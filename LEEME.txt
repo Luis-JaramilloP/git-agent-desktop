@@ -1,5 +1,5 @@
 ==========================================================
- GIT AGENT DESKTOP 2.2.1 - LEEME
+ GIT AGENT DESKTOP 2.2.2 - LEEME
  Automatizacion agentica de Pull Requests
 ==========================================================
 
@@ -137,5 +137,5 @@ VERIFICAR EL INSTALADOR (opcional)
 
 
 ----------------------------------------------------------
- Git Agent Desktop 2.2.1
+ Git Agent Desktop 2.2.2
 ----------------------------------------------------------

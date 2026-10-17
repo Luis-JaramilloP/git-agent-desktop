@@ -1,6 +1,6 @@
 [package]
 name = "git-agent-desktop"
-version = "2.2.1"
+version = "2.2.2"
 description = "Automatizacion agentica de Pull Requests sobre GitHub CLI y GitHub Models"
 authors = ["Git Agent Desktop"]
 edition = "2021"
